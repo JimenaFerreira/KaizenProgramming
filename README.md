@@ -1,2 +1,3 @@
-#Python implementation of Kaizen Progamming
-#Solve Symbolic regression problems
+Python implementation of Kaizen Progamming
+ 
+Solve Symbolic regression problems
