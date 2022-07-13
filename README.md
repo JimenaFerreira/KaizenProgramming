@@ -1,3 +1,3 @@
-Python implementation of Multivariate Kaizen Progamming
+Multi-output Kaizen Progamming for Python
  
-Solve Symbolic regression problems
+Solve multi-output/multi-target Symbolic regression problems
