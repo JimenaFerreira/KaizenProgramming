@@ -27,28 +27,31 @@ def CleanLD(F):
     
     return F, ind_dejar
 
-def PLSR(F,y,n,r, y_max, I=None):
+def PLSR(F,y,n,r, y_max, I=None, prt=False):
     if F.shape[1]>0:  #Almost one individual
         from sklearn.metrics import mean_squared_error, r2_score
         from scipy.stats import t
         from sklearn.linear_model import LinearRegression
 
-        if I is None:
-            I= np.ones((r,y.shape[1]))
-
         mlr=LinearRegression(fit_intercept=False)
-        B=np.empty((F.shape[1],y.shape[1]))
-        y_est= np.empty(y.shape)
-        for p in range(y.shape[1]):
-            datos= np.empty(F.shape)
-            for filas in range(F.shape[0]):
-                datos[filas,:]= np.multiply(F[filas,:],I[:,p] ).reshape(1,-1)
-            mlr.fit(datos ,y[:,p])
-            B[:,p]=np.multiply(mlr.coef_, I[:,p])
-            y_est[:,p]= np.dot(np.asarray(F), np.asarray(B[:,p]))
+        if I is None:
+            mlr.fit(F, y)
+            B = mlr.coef_.T
+            y_est = mlr.predict(F)
+            I= np.ones((r,y.shape[1]))
+        else:
+            B=np.empty((F.shape[1],y.shape[1]))
+            y_est= np.empty(y.shape)
+            for p in range(y.shape[1]):
+                datos= np.empty(F.shape)
+                for filas in range(F.shape[0]):
+                    datos[filas,:]= np.multiply(F[filas,:],I[:,p] ).reshape(1,-1)
+                mlr.fit(datos ,y[:,p])
+                B[:,p]=np.multiply(mlr.coef_, I[:,p])
+                y_est[:,p]= np.dot(np.asarray(F), np.asarray(B[:,p]))
 
         if np.all(np.isfinite(y_est)):
-            df= n - 1
+            df= n - 1 # degree of freedom = n-1
 
             A=np.matmul(np.asarray(F.T), np.asarray(F))
             try:
@@ -82,12 +85,12 @@ def PLSR(F,y,n,r, y_max, I=None):
             AdjR2=r2
             for p in range(y.shape[1]):
                 r= np.count_nonzero(I[:,p])
-                AdjR2[p]= 1- (1-r2[p]) * (n-1)/(n-r-1)
+                AdjR2[p]= 1- (1-r2[p]) * (n-1)/(n-r-1)   
+                    
         else:
             print('PLS didnt reach finite values')
             B, p_value, r2, AdjR2=np.asarray([]), np.asarray([]),-1*np.ones((y.shape[1])), -1*np.ones((y.shape[1]))
             RMSE, RMSE_Norm= -1*np.ones((y.shape[1])), -1*np.ones((y.shape[1])) 
-
     else:
         B, p_value, r2, AdjR2=np.asarray([]),np.asarray([]),-1*np.ones((y.shape[1])), -1*np.ones((y.shape[1]))
         RMSE, RMSE_Norm= -1*np.ones((y.shape[1])), -1*np.ones((y.shape[1])) 
